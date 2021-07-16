@@ -1,0 +1,32 @@
+service: product-service
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-west-1
+  lambdaHashingVersion: 20201221
+  apiGateway:
+    shouldStartNameWithService: true
+
+plugins:
+  - serverless-webpack
+
+functions:
+  getProductsList:
+    handler: src/handlers/get-products-list.getProductsList
+    events:
+      - http:
+          path: /products
+          method: get
+          cors: true
+
+  getProductsById:
+    handler: src/handlers/get-products.getProductsById
+    events:
+      - http:
+          path: /products/{productId}
+          method: get
+          cors: true
