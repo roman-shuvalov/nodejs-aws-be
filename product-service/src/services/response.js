@@ -28,3 +28,10 @@ export const serverError = () => {
     body: 'Oops! Something went wrong'
   });
 };
+
+export const badRequest = (body) => {
+  return response({
+    statusCode: 400,
+    body: JSON.stringify(body),
+  });
+}

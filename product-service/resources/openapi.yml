@@ -1,7 +1,10 @@
 openapi: 3.0.3
 info:
   title: Product service
-  version: v1.0.0
+  version: v1.1.0
+servers:
+  - url: https://x4t5oybu59.execute-api.eu-west-1.amazonaws.com/dev
+    description: API endpoint
 paths:
   /products:
     get:
@@ -21,7 +24,37 @@ paths:
               schema:
                 type: string
                 example: Server error
-  '/products/{productId}':
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BadRequestCreate'
+        '500':
+          description: Server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Server error
+
+  /products/{productId}:
     get:
       parameters:
         - name: productId
@@ -75,3 +108,45 @@ components:
       required:
         - id
         - title
+    BadRequestCreate:
+      type: object
+      properties:
+        instancePath:
+          type: string
+        schemaPath:
+          type: string
+          example: '#/additionalProperties'
+        keyword:
+          type: string
+          example: additionalProperties
+        params:
+          type: object
+          properties:
+            additionalProperty:
+              type: string
+              example: productId
+        message:
+          type: string
+          example: must NOT have additional properties
+    CreateProductRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: New product
+        description:
+          type: string
+          example: Short Product Description1
+        price:
+          type: integer
+          minimum: 0
+          example: 2
+        count:
+          type: integer
+          minimum: 0
+          example: 3
+      required:
+        - title
+externalDocs:
+  url: https://d2vdbjor2dbwpy.cloudfront.net/
+  description: FE cloudfront

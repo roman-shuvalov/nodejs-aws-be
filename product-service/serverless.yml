@@ -10,6 +10,8 @@ provider:
   lambdaHashingVersion: 20201221
   apiGateway:
     shouldStartNameWithService: true
+  environment:
+    pgConfig: ${s3:nodejs-aws-be-variables/pg-config}
 
 plugins:
   - serverless-webpack
@@ -29,4 +31,12 @@ functions:
       - http:
           path: /products/{productId}
           method: get
+          cors: true
+
+  postProducts:
+    handler: src/handlers/post-products.postProducts
+    events:
+      - http:
+          path: /products
+          method: post
           cors: true
