@@ -4,6 +4,8 @@ import { ok, notFound, serverError } from '../services/response';
 export const getProductsById = async (event) => {
   try {
     const { pathParameters: { productId } } = event;
+    console.info(`Invoke getProductsById function with productId: ${productId}`);
+
     const product = await findProductById(productId);
 
     if (!product) {
@@ -12,7 +14,7 @@ export const getProductsById = async (event) => {
 
     return ok(product);
   } catch (e) {
-    console.log(e, 'Event:', event);
+    console.error(e);
     return serverError();
   }
 };

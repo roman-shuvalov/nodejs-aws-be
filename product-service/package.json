@@ -5,6 +5,7 @@
   "scripts": {
     "build": "serverless package",
     "deploy": "serverless deploy",
+    "build:deploy": "npm run build && npm run deploy",
     "test": "jest test"
   },
   "author": "Roman Shuvalov",
@@ -14,5 +15,9 @@
     "jest": "^27.0.6",
     "serverless-webpack": "^5.5.1",
     "webpack": "^5.44.0"
+  },
+  "dependencies": {
+    "ajv": "^8.6.2",
+    "pg": "^8.6.0"
   }
 }
