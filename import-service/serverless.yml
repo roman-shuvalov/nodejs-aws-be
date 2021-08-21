@@ -1,0 +1,84 @@
+service: import-service
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-west-1
+  lambdaHashingVersion: 20201221
+  apiGateway:
+    shouldStartNameWithService: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+          Resource:
+            - arn:aws:s3:::${self:custom.filesBucketName}/${self:custom.uploadFolderName}/*
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+          Resource:
+            - arn:aws:s3:::${self:custom.filesBucketName}/${self:custom.parsedFolderName}/*
+
+custom:
+  filesBucketName: ${self:service}-${self:provider.stage}-files
+  uploadFolderName: uploaded
+  parsedFolderName: parsed
+
+plugins:
+  - serverless-webpack
+
+functions:
+  importProductsFile:
+    handler: src/handlers/import-products-file.importProductsFile
+    environment:
+      BUCKET_NAME: ${self:custom.filesBucketName}
+      UPLOAD_FOLDER_NAME: ${self:custom.uploadFolderName}
+    events:
+      - http:
+          path: /import
+          method: get
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                name: true
+
+  importFileParser:
+    handler: src/handlers/import-file-parser.importFileParser
+    environment:
+      BUCKET_NAME: ${self:custom.filesBucketName}
+      PARSED_FOLDER_NAME: ${self:custom.parsedFolderName}
+    events:
+      - s3:
+          bucket: ${self:custom.filesBucketName}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: ${self:custom.uploadFolderName}
+          existing: true
+
+resources:
+  Resources:
+    FilesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.filesBucketName}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - 'PUT'
+              AllowedOrigins:
+                - '*'
+              ExposedHeaders:
+                - 'x-amz-server-side-encryption'
+                - 'x-amz-request-id'
+                - 'x-amz-id-2'
+              MaxAge: 3000
