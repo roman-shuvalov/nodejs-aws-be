@@ -10,6 +10,8 @@ provider:
   lambdaHashingVersion: 20201221
   apiGateway:
     shouldStartNameWithService: true
+  environment:
+    pgConfig: ${s3:nodejs-aws-be-variables/pg-config}
   iam:
     role:
       statements:
@@ -25,6 +27,14 @@ provider:
             - s3:PutObject
           Resource:
             - arn:aws:s3:::${self:custom.filesBucketName}/${self:custom.parsedFolderName}/*
+        - Effect: Allow
+          Action:
+            - sqs:*
+          Resource: !GetAtt CatalogItemsQueue.Arn
+        - Effect: Allow
+          Action:
+            - sns:*
+          Resource: !Ref CreateProductTopic
 
 custom:
   filesBucketName: ${self:service}-${self:provider.stage}-files
@@ -53,6 +63,8 @@ functions:
   importFileParser:
     handler: src/handlers/import-file-parser.importFileParser
     environment:
+      CATALOG_ITEMS_QUEUE:
+        Ref: CatalogItemsQueue
       BUCKET_NAME: ${self:custom.filesBucketName}
       PARSED_FOLDER_NAME: ${self:custom.parsedFolderName}
     events:
@@ -62,6 +74,15 @@ functions:
           rules:
             - prefix: ${self:custom.uploadFolderName}
           existing: true
+
+  catalogBatchProcess:
+    handler: src/handlers/catalog-batch-process.catalogBatchProcess
+    environment:
+      CREATE_PRODUCT_TOPIC: !Ref CreateProductTopic
+    events:
+      - sqs:
+          arn: !GetAtt CatalogItemsQueue.Arn
+          batchSize: 5
 
 resources:
   Resources:
@@ -82,3 +103,27 @@ resources:
                 - 'x-amz-request-id'
                 - 'x-amz-id-2'
               MaxAge: 3000
+    CatalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
+    CreateProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: createProductTopic
+    CreateProductTopicSubscriptionTen:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: 'roman_shuvalov@epam.com'
+        Protocol: email
+        TopicArn: !Ref CreateProductTopic
+        FilterPolicy:
+          price: [10]
+    CreateProductTopicSubscriptionFive:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: 'romanshuvalov@yahoo.com'
+        Protocol: email
+        TopicArn: !Ref CreateProductTopic
+        FilterPolicy:
+          price: [5]
