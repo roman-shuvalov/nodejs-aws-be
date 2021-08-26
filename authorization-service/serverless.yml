@@ -1,0 +1,21 @@
+service: authorization-service
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: eu-west-1
+  lambdaHashingVersion: 20201221
+  environment:
+    authConfig: ${s3:nodejs-aws-be-variables/auth-config}
+
+functions:
+  basicAuthorizer:
+    handler: handler.basicAuthorizer
+
+resources:
+  Outputs:
+    BasicAuthorizerArn:
+      Value: !GetAtt BasicAuthorizerLambdaFunction.Arn

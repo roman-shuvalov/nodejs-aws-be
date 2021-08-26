@@ -59,6 +59,8 @@ functions:
             parameters:
               querystrings:
                 name: true
+          authorizer:
+            arn: ${cf:authorization-service-dev.BasicAuthorizerArn}
 
   importFileParser:
     handler: src/handlers/import-file-parser.importFileParser
@@ -103,6 +105,15 @@ resources:
                 - 'x-amz-request-id'
                 - 'x-amz-id-2'
               MaxAge: 3000
+    GatewayResponse:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
     CatalogItemsQueue:
       Type: AWS::SQS::Queue
       Properties:

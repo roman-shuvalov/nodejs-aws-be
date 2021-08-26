@@ -24,6 +24,8 @@ functions:
           path: /products
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-1:583941112965:userpool/eu-west-1_pRzicT5x8
 
   getProductsById:
     handler: src/handlers/get-products.getProductsById
@@ -40,3 +42,15 @@ functions:
           path: /products
           method: post
           cors: true
+
+resources:
+  Resources:
+    GatewayResponse:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
