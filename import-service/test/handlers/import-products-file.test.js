@@ -18,12 +18,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  response.ok.mockClear();
-  response.badRequest.mockClear();
-  response.serverError.mockClear();
-  s3.getPutSignedUrlPromise.mockClear();
-  global.console.info.mockClear();
-  global.console.error.mockClear();
+  jest.clearAllMocks();
 });
 
 it('Should invoke bad request if name not provided', async () => {
