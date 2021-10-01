@@ -24,8 +24,8 @@ functions:
           path: /products
           method: get
           cors: true
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-1:583941112965:userpool/eu-west-1_pRzicT5x8
+#          authorizer:
+#            arn: arn:aws:cognito-idp:eu-west-1:583941112965:userpool/eu-west-1_pRzicT5x8
 
   getProductsById:
     handler: src/handlers/get-products.getProductsById
